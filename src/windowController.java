@@ -3,7 +3,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.Pane;
 
-public class Controller {
+public class windowController {
     @FXML
     private Pane rocketArea;
     @FXML
@@ -49,6 +49,10 @@ public class Controller {
 
     public void updateRocketPoolSizeLabel(String value) {
         this.rocketPoolSizeLabel.setText(value);
+    }
+
+    public void adjustRocketPoolSizeSliderValue(int value) {
+        this.rocketPoolSizeSlider.adjustValue(value);
     }
 
     public void rocketPoolSizeSliderOnAction() {

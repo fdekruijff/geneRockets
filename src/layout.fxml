@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane prefHeight="666.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<BorderPane prefHeight="666.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="windowController">
    <center>
       <Pane fx:id="rocketArea" prefHeight="550.0" prefWidth="1000.0" style="-fx-background-color: f2f2f2; -fx-border-color: #008080; -fx-border-width: 2px;" BorderPane.alignment="CENTER" />
    </center>

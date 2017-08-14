@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class geneRockets extends Application {
@@ -18,9 +19,9 @@ public class geneRockets extends Application {
     private double highestFlightTime = 0;
 
     private Stage stage;
-    private ArrayList<Rocket> rockets;
+    private ArrayList<Rocket> population;
     private ArrayList<Rocket> idleRockets;
-    private Controller controller;
+    private windowController windowController;
     private Random random;
 
     public static void main(String[] args) {
@@ -29,7 +30,7 @@ public class geneRockets extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.rockets = new ArrayList<>();
+        this.population = new ArrayList<>();
         this.idleRockets = new ArrayList<>();
         this.random = new Random();
 
@@ -38,16 +39,16 @@ public class geneRockets extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("layout.fxml"));
         Parent root = loader.load();
-        this.controller = loader.getController();
-        this.controller.initialize(this);
+        this.windowController = loader.getController();
+        this.windowController.initialize(this);
 
-        this.controller.updateRocketPoolSizeLabel(Integer.toString(this.rocketPoolSize));
-//        this.controller.adjustRocketPoolSizeSliderValue(this.rocketPoolSize);
+        this.windowController.updateRocketPoolSizeLabel(Integer.toString(this.rocketPoolSize));
+        this.windowController.adjustRocketPoolSizeSliderValue(this.rocketPoolSize);
 
         for (int x = 0; x < this.rocketPoolSize; x++) {
             Rocket rocket = new Rocket(this);
-            this.rockets.add(rocket);
-            this.controller.addRocketToWindow(rocket);
+            this.population.add(rocket);
+            this.windowController.addRocketToWindow(rocket);
         }
 
         new AnimationTimer() {
@@ -65,11 +66,11 @@ public class geneRockets extends Application {
      * update tick function
      */
     private void update() {
-        for (Rocket rocket : this.rockets) {
+        for (Rocket rocket : this.population) {
             rocket.update();
         }
 
-        if (this.idleRockets.size() == this.rockets.size()) {
+        if (this.idleRockets.size() == this.population.size()) {
             this.generateNewRockets();
         }
     }
@@ -81,32 +82,32 @@ public class geneRockets extends Application {
         ArrayList<Rocket> newRockets = new ArrayList<>();
         this.generationCount++;
 
-        for (Rocket rocket : this.rockets) {
+        for (Rocket rocket : this.population) {
             rocket.setFitness(Math.floor(rocket.getFitness()));
             for (int i = 0; i < rocket.getFitness(); i++) {
                 newRockets.add(rocket);
             }
         }
 
-        this.rockets.clear();
+        this.population.clear();
 
         for (int i = 0; i < this.rocketPoolSize; i++) {
             Rocket r1 = newRockets.get(random.nextInt(newRockets.size()));
             Rocket r2 = newRockets.get(random.nextInt(newRockets.size()));
 
-            this.rockets.add(new Rocket(this, createChildDNA(r1, r2)));
+            this.population.add(new Rocket(this, createChildDNA(r1, r2)));
         }
 
         // Clear window
-        this.controller.removeRocketFromWindow();
-        this.controller.updateHighestFitnessLabel(Integer.toString((int) Math.floor(this.highestFitness)));
-        this.controller.updateGenerationLabel(Integer.toString(this.generationCount));
-        this.controller.updateFlightTimeLabel(this.formatFlightTime());
+        this.windowController.removeRocketFromWindow();
+        this.windowController.updateHighestFitnessLabel(Integer.toString((int) Math.floor(this.highestFitness)));
+        this.windowController.updateGenerationLabel(Integer.toString(this.generationCount));
+        this.windowController.updateFlightTimeLabel(this.formatFlightTime());
 
         // Add new Rockets to window
-        for (Rocket rocket : this.rockets) {
+        for (Rocket rocket : this.population) {
             rocket.applyMutations();
-            this.controller.addRocketToWindow(rocket);
+            this.windowController.addRocketToWindow(rocket);
         }
 
         // Clear the rocket arrays
@@ -121,14 +122,14 @@ public class geneRockets extends Application {
      * @return DNA object
      */
     private DNA createChildDNA(Rocket rocket1, Rocket rocket2) {
-        ArrayList<Gene> newGenes = new ArrayList<>();
+        ArrayList<Vec2d> newGenes = new ArrayList<>();
 
         for (int i = 0; i < rocket1.getDna().getGenes().size(); i++) {
             if (i < rocket1.getDna().getGenes().size() && i < rocket2.getDna().getGenes().size()) {
-                double newX = (rocket1.getDna().getGenes().get(i).getVector().x + rocket2.getDna().getGenes().get(i).getVector().x) / 2;
-                double newY = (rocket1.getDna().getGenes().get(i).getVector().y + rocket2.getDna().getGenes().get(i).getVector().y) / 2;
+                double newX = (rocket1.getDna().getGenes().get(i).x + rocket2.getDna().getGenes().get(i).x) / 2;
+                double newY = (rocket1.getDna().getGenes().get(i).y + rocket2.getDna().getGenes().get(i).y) / 2;
 
-                newGenes.add(new Gene(new Vec2d(newX, newY)));
+                newGenes.add(new Vec2d(newX, newY));
             }
         }
 
@@ -153,18 +154,22 @@ public class geneRockets extends Application {
     public void restart() {
         this.highestFlightTime = 0;
         this.highestFitness = 0;
-        this.rockets.clear();
+        this.population.clear();
         this.idleRockets.clear();
         this.generationCount = 1;
-        this.controller.updateHighestFitnessLabel(Integer.toString((int) Math.floor(this.highestFitness)));
-        this.controller.updateGenerationLabel(Integer.toString(this.generationCount));
-        this.controller.updateFlightTimeLabel(this.formatFlightTime());
-        this.controller.removeRocketFromWindow();
+        this.windowController.updateHighestFitnessLabel(Integer.toString((int) Math.floor(this.highestFitness)));
+        this.windowController.updateGenerationLabel(Integer.toString(this.generationCount));
+        this.windowController.updateFlightTimeLabel(this.formatFlightTime());
+        this.windowController.removeRocketFromWindow();
         for (int x = 0; x < this.rocketPoolSize; x++) {
             Rocket rocket = new Rocket(this);
-            this.rockets.add(rocket);
-            this.controller.addRocketToWindow(rocket);
+            this.population.add(rocket);
+            this.windowController.addRocketToWindow(rocket);
         }
+    }
+
+    public void skipGeneration() {
+
     }
 
     void addIdleRocket(Rocket rocket) {
@@ -197,9 +202,5 @@ public class geneRockets extends Application {
 
     public void setRocketPoolSize(int rocketPoolSize) {
         this.rocketPoolSize = rocketPoolSize;
-    }
-
-    public int getGenerationCount() {
-        return generationCount;
     }
 }
